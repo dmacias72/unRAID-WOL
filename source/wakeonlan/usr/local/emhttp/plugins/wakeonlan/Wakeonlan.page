@@ -1,0 +1,6 @@
+Menu="NetworkServices"
+Icon="wakeonlan.png"
+Title="Wake On Lan"
+Type="xmenu"
+Tabs="true"
+---

@@ -1,0 +1,246 @@
+Menu="Wakeonlan:1"
+Title="Wake On Lan"
+---
+<? require_once '/usr/local/emhttp/plugins/wakeonlan/include/wol_settings.php';?>
+
+<link type="text/css" rel="stylesheet" href="/plugins/wakeonlan/css/tablesorter.css">
+<link type="text/css" rel="stylesheet" href="/plugins/wakeonlan/css/tablesorter-<?=htmlspecialchars($display["theme"]);?>.css">
+<style>
+table.tablesorter tbody tr:nth-child(even) {
+    background-color: #<?=($display['theme'] == 'white' || $display['theme'] == 'azure') ? 'E0E0E0' : '202020';?>;
+}
+.mac-uppercase {
+    text-transform:uppercase;
+}
+</style>
+
+<table class="tablesorter" id="tblData">
+    <thead>
+        <tr>
+            <th> Status </th>
+            <th> Hostname </th>
+            <th> IP Address </th>
+            <th> MAC Address </th>
+            <th><a><i class="fa fa-trash" id='allMac' title='remove all'> all </i></a></th>
+        </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+
+<form markdown="1">
+
+&nbsp;
+: <button type="button" id="btnNew"/>new</button><button type="button" id="btnDone" onclick="done();"/>Done</button>
+</form>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.11/jquery.mask.min.js" integrity="sha256-f4H9UFZcQrKNDBMe5V3OIUcs/j7z9VcuBPJ5uYmBSdU=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.28.15/js/jquery.tablesorter.combined.min.js" integrity="sha256-WHm2h/38srdbq290ZchoKZkN3XZvEnxGXXN4h6VzTes=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.28.15/js/parsers/parser-network.min.js" integrity="sha256-N7BKqlOgIc3JKlpQVAYyCshuPO4QcT5dcfs3ptUn61Y=" crossorigin="anonymous"></script>
+
+<script>
+$(function(){
+    // dynamix plugin update api
+    <?if (function_exists('plugin_update_available') && $version = plugin_update_available('wakeonlan')):?>
+        showNotice('Wake On Lan <?=htmlspecialchars($version);?> available. <a>Update</a>','wakonlan');
+        $('#user-notice a').on('click', function () {
+            $('#user-notice').empty();
+        });
+    <?endif;?>
+
+    //setup tablesorter
+    $('#tblData').tablesorter({
+        headers:{0:{sorter:false},2:{sorter:'ipv4Address'},3:{sorter:'MAC'},4:{sorter:false}},
+        widgets: ['stickyHeaders', 'saveSort'],
+        widgetOptions: {
+            stickyHeaders_filteredToTop: true
+         }
+    });
+
+    //Add all click functions
+    $('.delete').click(Delete);
+    $('#btnNew').one('click', New);
+    $('.wake').on('click', Wake);
+    $('#allMac').on('click', DeleteAll);
+
+    $.fn.makeEditable = function() {
+        $(this).on('dblclick',function(){
+            if($(this).find('input').is(':focus')) return this;
+                var td = $(this);
+                var tdHtml = td.html();
+                var tdWidth = (td.hasClass('hostname')) ? 150 : 115;
+
+                td.html('<input type="text" value="'+tdHtml+'" style="width:'+tdWidth+'px;"/><i id="edit-error" class="fa fa-exclamation red" style="display:none;"/>')
+                .find('input')
+                .focus(function(){
+
+                    if(td.hasClass('ip-address'))
+                        td.find('input').mask('0ZZ.0ZZ.0ZZ.0ZZ', {translation:  {'Z': {pattern: /[0-9]/, optional: true}}});
+
+                    if(td.hasClass('mac-address'))
+                        td.find('input').mask('AA:AA:AA:AA:AA:AA', {translation:  {'A': {pattern: /[A-Fa-f0-9]/, optional: false}}});
+
+                    $(this).select();
+                })
+                .trigger('focus')
+                .on({
+                    'focusout': function(){
+                        $(this).trigger('saveEditable');
+                        $(this).find('input').unmask();
+                    },
+                    'keyup':function(e){
+                        if(e.which == '13'){ // enter
+                            $(this).trigger('saveEditable');
+                        } else if(e.which == '27'){ // escape
+                            $(this).trigger('closeEditable');
+                        }
+                    },
+                    'closeEditable':function(){
+                        td.find('input').unmask();
+                        td.html(tdHtml);
+                        $('#tblData').trigger('update');
+                    },
+                    'saveEditable':function(){
+                        // check if the mac is less than 17 or if the ip period count is less than 3
+                        if((td.hasClass('mac-address') && $(this).val().length < 17) || (td.hasClass('ip-address') && ($(this).val().match(/\./g) || [] ).length  < 3)){
+                            td.find('input').focus();
+                            $('#edit-error').show();
+                        }else{
+                            td.html($(this).val());
+                            par = td.parent();
+                            var hostName = par.children('td:nth-child(2)').html();
+                            var ipAddress = par.children('td:nth-child(3)').html();
+                            var macAddress = par.children('td:nth-child(4)').html();
+                            var oldMac = (td.hasClass('mac-address')) ? tdHtml : macAddress;
+                            $.post('/plugins/wakeonlan/include/edit_node.php',{name:hostName, ip:ipAddress, mac:macAddress, oldmac:oldMac})
+                            $(this).trigger('closeEditable');
+                             $.getJSON('/plugins/wakeonlan/include/scan_ip.php', {ip: ipAddress}, function(ipStatus) {
+                                par.children('td:nth-child(1)').html('<img src="/plugins/dynamix/images/green-'+ipStatus+'.png"/>');
+                            });
+
+                        }
+                    }
+                });
+
+        });
+        return this;
+    }
+
+    //load table from xml
+    parseXML();
+});
+
+function addRow(hostName, ipAddress, macAddress) {
+    $('#tblData tbody').append('<tr id="'+macAddress.replace(/:/g,'')+'">'+
+    '<td class="wake" title="click to wake host"><img src="/plugins/dynamix/images/green-blink.png"/></td>'+
+    '<td class="edit hostname" title="double click to edit hostname">'+hostName+'</td>'+
+    '<td class="edit ip-address" title="double click to edit IP address">'+ipAddress+'</td>'+
+    '<td class="edit mac-uppercase mac-address" title="double click to edit mac address">'+macAddress+'</td>'+
+    '<td><a class="delete" title="delete"><i class="fa fa-trash"></i></a></td></tr>');
+}
+
+function Delete() {
+    var par = $(this).parent().parent();
+    tdMac = par.children('td:nth-child(4)').html();
+    $.post('/plugins/wakeonlan/include/delete_node.php', {mac: tdMac}, function () {
+            slideRow(par);
+        }
+    );
+}
+
+function DeleteAll() {
+    swal({
+        title: 'Are you sure?',
+        text: 'You want to remove all!?',
+        type: 'warning',
+        showCancelButton: true,
+        closeOnConfirm: true,
+        }, function() {
+            $.post('/plugins/wakeonlan/include/delete_node.php', {mac: 'all'}, function () {
+                $('#tblData tbody').empty(); // empty table
+            });
+        }
+    );
+}
+
+function genMAC(){
+    var hexDigits = '0123456789ABCDEF';
+    var macAddress = '';
+    for (var i = 0; i < 6; i++) {
+        macAddress+=hexDigits.charAt(Math.round(Math.random() * 15));
+        macAddress+=hexDigits.charAt(Math.round(Math.random() * 15));
+        if (i != 5) macAddress += ':';
+    }
+
+    return macAddress;
+}
+
+function New(){
+    var hostName = 'New';
+    var ipAddress = "<?=htmlspecialchars(substr_replace($excludeip ,'',-1).'0');?>";
+    var macAddress = genMAC();
+    addRow(hostName, ipAddress, macAddress);
+    $.post('/plugins/wakeonlan/include/add_node.php',{name:hostName, ip:ipAddress, mac:macAddress});
+    $('.edit').makeEditable();
+    $('.wake').click(Wake);
+    $('.delete').click(Delete);
+}
+
+function parseXML(){
+    $.get('/boot/config/plugins/wakeonlan/wakeonlan.xml', function(xml) {
+            $(xml).find('host').each(function(){
+                var hostName = 'unknown';
+                var ipAddress
+                var macAddress
+                hostName = $(this).find('hostnames').find('hostname').attr('name');
+                ipAddress = $(this).find('address').attr('addr');
+                $(this).find('address').each(function() {
+                    if ($(this).attr('addrtype') == 'mac') {
+                        macAddress = $(this).attr('addr');
+                        return macAddress;
+                    }
+                });
+                addRow(hostName, ipAddress, macAddress);
+            });
+            $('#tblData').trigger('update');
+            $('.edit').makeEditable();
+            $('.wake').click(Wake);
+            $('.delete').click(Delete);
+
+            ScanIP();
+    },'xml');
+}
+
+function Refresh() {
+    //document.location.reload(false);
+}
+
+function ScanIP() {
+    $('#tblData tbody tr').each(function(row, tr){
+        var ipAddress = $(tr).children('td:nth-child(3)').html();
+        $.getJSON('/plugins/wakeonlan/include/scan_ip.php', {ip: ipAddress}, function(ipStatus) {
+                $(tr).children('td:nth-child(1)').html('<img src="/plugins/dynamix/images/green-'+ipStatus+'.png"/>');
+        });
+    });
+}
+
+function slideRow(par) {
+    par
+    .children('td')
+    .animate({ padding: 0 })
+    .wrapInner('<div />')
+    .children()
+    .slideUp(function() { par.remove(); });
+    $('#tblData').trigger('update')
+}
+
+function Wake(){
+    var par = $(this).parent()
+    var tdStatus = par.children('td:nth-child(1)');
+    var macAddress = par.children('td:nth-child(4)').html();
+    tdStatus.html('<img src="/plugins/dynamix/images/loading.gif">');
+    $.post('/plugins/wakeonlan/include/wake.php', {mac: macAddress, ifname: "<?=htmlspecialchars($ifname);?>"}, function() {
+          setTimeout(ScanIP, 9999);
+    });
+}
+</script>
