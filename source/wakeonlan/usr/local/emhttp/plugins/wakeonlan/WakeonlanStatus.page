@@ -212,7 +212,7 @@ function parseXML(){
 }
 
 function Refresh() {
-    //document.location.reload(false);
+    document.location.reload(false);
 }
 
 function ScanIP() {
