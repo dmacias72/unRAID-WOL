@@ -65,7 +65,7 @@ function Add(){
 }
 
 function parseScan(){
-    $.get('/log/wakeonlan/scan.xml', function(xml) {
+    $.get('/log/scan', function(xml) {
             $(xml).find('host').each(function(){
                 var hostName;
                 var ipAddress;
