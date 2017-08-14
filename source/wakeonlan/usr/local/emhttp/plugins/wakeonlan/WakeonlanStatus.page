@@ -21,6 +21,7 @@ table.tablesorter tbody tr:nth-child(even) {
             <th> Hostname </th>
             <th> IP Address </th>
             <th> MAC Address </th>
+            <th> Schedule </th>
             <th><a><i class="fa fa-trash" id='allMac' title='remove all'> all </i></a></th>
         </tr>
     </thead>
@@ -70,8 +71,10 @@ $(function(){
                 var tdHtml = td.html();
                 var tdWidth = (td.hasClass('hostname')) ? 150 : 115;
 
-                td.html('<input type="text" value="'+tdHtml+'" style="width:'+tdWidth+'px;"/><i id="edit-error" class="fa fa-exclamation red" style="display:none;"/>')
+                td.html('<input type="text"/><i id="edit-error" class="fa fa-exclamation red" style="display:none;"/>')
                 .find('input')
+                .val(tdHtml)
+                .css('width', tdWidth)
                 .focus(function(){
 
                     if(td.hasClass('ip-address'))
@@ -131,11 +134,13 @@ $(function(){
 });
 
 function addRow(hostName, ipAddress, macAddress) {
-    $('#tblData tbody').append('<tr id="'+macAddress.replace(/:/g,'')+'">'+
+    var macID = macAddress.replace(/:/g,'');
+    $('#tblData tbody').append('<tr id="'+macID+'">'+
     '<td class="wake" title="click to wake host"><img src="/plugins/dynamix/images/green-blink.png"/></td>'+
     '<td class="edit hostname" title="double click to edit hostname">'+hostName+'</td>'+
     '<td class="edit ip-address" title="double click to edit IP address">'+ipAddress+'</td>'+
     '<td class="edit mac-uppercase mac-address" title="double click to edit mac address">'+macAddress+'</td>'+
+    '<td></td>'+
     '<td><a class="delete" title="delete"><i class="fa fa-trash"></i></a></td></tr>');
 }
 
