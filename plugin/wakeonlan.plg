@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "wakeonlan">
 <!ENTITY author    "dmacias72">
-<!ENTITY version   "2017.07.23">
+<!ENTITY version   "2017.10.03">
 <!ENTITY launch    "Settings/Wakeonlan">
 <!ENTITY gitURL    "https://raw.githubusercontent.com/&author;/unRAID-WOL/master">
 <!ENTITY pluginURL "&gitURL;/plugin/&name;.plg">
@@ -17,6 +17,9 @@
 
 <CHANGES>
 ##&name;
+###2017.10.03
+- fix stickyheaders and css for new themes
+- move cdnjs to local
 ###2017.07.23
 - move to separate WOL repository
 - restructure, streamline and remove depreciated code
