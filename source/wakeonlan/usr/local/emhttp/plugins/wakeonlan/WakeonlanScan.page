@@ -29,7 +29,9 @@ $(function(){
         headers:{1:{sorter:'ipv4Address'},2:{sorter:'MAC'}},
         widgets: ['stickyHeaders', 'saveSort'],
         widgetOptions: {
-            stickyHeaders_filteredToTop: true
+            stickyHeaders_offset: ($('#header').css("position") === "fixed") ? '90' : '0',
+            stickyHeaders_attachTo: null,
+            stickyHeaders_filteredToTop: true,
          }
     });
 
