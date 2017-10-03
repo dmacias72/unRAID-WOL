@@ -4,10 +4,14 @@ Title="Wake On Lan"
 <? require_once '/usr/local/emhttp/plugins/wakeonlan/include/wol_settings.php';?>
 
 <link type="text/css" rel="stylesheet" href="/plugins/wakeonlan/css/tablesorter.css">
-<link type="text/css" rel="stylesheet" href="/plugins/wakeonlan/css/tablesorter-<?=htmlspecialchars($display["theme"]);?>.css">
+<link type="text/css" rel="stylesheet" href="/plugins/wakeonlan/css/tablesorter-<?=($display['theme'] == 'white' || $display['theme'] == 'azure') ? 'white' : 'black';?>.css">
+<link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.switchbutton.css">
 <style>
+table.tablesorter tbody tr:nth-child(odd) {
+    background-color: #<?=($display['theme'] == 'white' || $display['theme'] == 'azure') ? 'F0F0F0' : '212421';?>;
+}
 table.tablesorter tbody tr:nth-child(even) {
-    background-color: #<?=($display['theme'] == 'white' || $display['theme'] == 'azure') ? 'E0E0E0' : '202020';?>;
+    background-color: #<?=($display['theme'] == 'white' || $display['theme'] == 'azure') ? 'e4e2e4' : '1b1d1b';?>;
 }
 .mac-uppercase {
     text-transform:uppercase;
@@ -21,7 +25,7 @@ table.tablesorter tbody tr:nth-child(even) {
             <th> Hostname </th>
             <th> IP Address </th>
             <th> MAC Address </th>
-            <th> Schedule </th>
+            <th></th>
             <th><a><i class="fa fa-trash" id='allMac' title='remove all'> all </i></a></th>
         </tr>
     </thead>
@@ -35,9 +39,9 @@ table.tablesorter tbody tr:nth-child(even) {
 : <button type="button" id="btnNew"/>new</button><button type="button" id="btnDone" onclick="done();"/>Done</button>
 </form>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.11/jquery.mask.min.js" integrity="sha256-f4H9UFZcQrKNDBMe5V3OIUcs/j7z9VcuBPJ5uYmBSdU=" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.28.15/js/jquery.tablesorter.combined.min.js" integrity="sha256-WHm2h/38srdbq290ZchoKZkN3XZvEnxGXXN4h6VzTes=" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.28.15/js/parsers/parser-network.min.js" integrity="sha256-N7BKqlOgIc3JKlpQVAYyCshuPO4QcT5dcfs3ptUn61Y=" crossorigin="anonymous"></script>
+<script src="/plugins/wakeonlan/js/jquery.tablesorter.combined.min.js"></script>
+<script src="/plugins/wakeonlan/js/parser-network.min.js"></script>
+<script src="/plugins/wakeonlan/js/jquery.mask.min.js"></script>
 
 <script>
 $(function(){
@@ -54,7 +58,9 @@ $(function(){
         headers:{0:{sorter:false},2:{sorter:'ipv4Address'},3:{sorter:'MAC'},4:{sorter:false}},
         widgets: ['stickyHeaders', 'saveSort'],
         widgetOptions: {
-            stickyHeaders_filteredToTop: true
+            stickyHeaders_offset: ($('#header').css("position") === "fixed") ? '90' : '0',
+            stickyHeaders_attachTo: null,
+            stickyHeaders_filteredToTop: true,
          }
     });
 
