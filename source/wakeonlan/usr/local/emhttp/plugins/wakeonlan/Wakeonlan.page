@@ -1,5 +1,5 @@
 Menu="NetworkServices"
-Icon="wakeonlan.png"
+Icon="bell"
 Title="Wake On Lan"
 Type="xmenu"
 Tabs="true"
