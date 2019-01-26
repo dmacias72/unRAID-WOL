@@ -1,5 +1,6 @@
 Menu="Wakeonlan:1"
 Title="Wake On Lan"
+Tag="bell"
 ---
 <? require_once '/usr/local/emhttp/plugins/wakeonlan/include/wol_settings.php';?>
 

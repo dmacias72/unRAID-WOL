@@ -1,5 +1,6 @@
 Menu="Wakeonlan:2"
 Title="Network Scan"
+Tag="search"
 ---
 <form markdown="1">
 
