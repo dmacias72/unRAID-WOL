@@ -19,6 +19,7 @@
 ##&name;
 ###2019.12.30
 - update status icons to fa fonts
+- update nmap
 ###2019.10.20
 - update nmap to 7.70 for Unraid 6.7+
 ###2019.01.25
@@ -93,9 +94,9 @@ This plugin uses etherwake for wake on lan
 <MD5>435837a5bf0401a937d6ec93e458333b</MD5>
 </FILE>
 
-<FILE Name="&plgPATH;/nmap-7.70-x86_64-3.txz" Min="6.7" Run="upgradepkg --install-new">
-<URL>&pkgURL;/nmap-7.70-x86_64-3.txz</URL>
-<MD5>2917b9c1db64491ba1b09d38db468f20</MD5>
+<FILE Name="&plgPATH;/nmap-7.80-x86_64-3.txz" Min="6.7" Run="upgradepkg --install-new">
+<URL>&pkgURL;/nmap-7.80-x86_64-3.txz</URL>
+<MD5>ba87afc200890097c7fc95345370725c</MD5>
 </FILE>
 
 <FILE Name="&plgPATH;/nmap-7.50-x86_64-1.txz" Min="6.3" Max="6.6.99" Run="upgradepkg --install-new">
