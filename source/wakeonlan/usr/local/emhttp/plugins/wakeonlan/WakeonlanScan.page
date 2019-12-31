@@ -21,7 +21,7 @@ Tag="search"
 </form>
 
 <div id="preload" style="display: none;">
-   <img src='/plugins/dynamix/images/loading.gif'>
+   <i class="fa orb grey-orb fa-refresh fa-spin"></i>
 </div>
 
 <script>
@@ -62,7 +62,7 @@ function Add(){
             $('.wake').click(Wake);
             $('.delete').click(Delete);
             $.getJSON('/plugins/wakeonlan/include/scan_ip.php', {ip: ipAddress}, function(ipStatus) {
-                $('#'+macAddress.replace(/:/g,'')).children('td:nth-child(1)').html('<img src="/plugins/dynamix/images/green-'+ipStatus+'.png"/>');
+                $('#'+macAddress.replace(/:/g,'')).children('td:nth-child(1)').html('<i class="fa fa-circle orb '+ipStatus+'orb middle"></i>');
             });
     });
 }
@@ -107,9 +107,9 @@ function parseScan(){
 }
 
 function Scan(){
-    $('#tblScan tbody').append('<tr class="addRow"><td><img src="/plugins/dynamix/images/loading.gif"></td>'+
-        '<td><img src="/plugins/dynamix/images/loading.gif"></td>'+
-        '<td><img src="/plugins/dynamix/images/loading.gif"></td></tr>');
+    $('#tblScan tbody').append('<tr class="addRow"><td><i class="fa orb grey-orb fa-refresh fa-spin"></i></td>'+
+        '<td><i class="fa orb grey-orb fa-refresh fa-spin"></i></td>'+
+        '<td><i class="fa orb grey-orb fa-refresh fa-spin"></i></td></tr>');
     $('#countdown').html('<font class="green">Scanning...</font>');
     $.post('/plugins/wakeonlan/include/scan.php',{ip: "<?=htmlspecialchars($excludeip);?>"}, function() {
             Refresh();
